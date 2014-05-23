@@ -10,223 +10,20 @@
     <script src="scripts/jquery-2.1.1.min.js"></script>
     <script src="scripts/jquery-ui-1.10.3.min.js"></script>
     <script src="scripts/knockout-2.3.0.js"></script>
-    
+    <script src="scripts/models/index.js"></script>
     
     <script type="text/javascript">
-        var mapDashboard = null;
-        var detailsDashboard = null;
-        var workbook, activeSheet;
-        function switchDashboard(selectedId, hideOnLoad, changeMap) {
-            if (hideOnLoad) {
-                setTimeout(function () {
-                    switchDashboard(['None']);
-                }, 2000);
-            }
-            if (selectedId[0] != "None") {
-                $("#detailsNoSelection").hide();
-                $("#detailsSelection").show();
-                $("#regionSelector").show();
-                var title = {};
-                for (var i = 0; i < selectedId.length; i++) {
-                    title[selectedId[i]] = 1;
-                }
-                var headerArr = [];
-                var header = "";
-                for (var propertyName in title) {
-                    headerArr.push(propertyName);
-                    //header += (header.length == 0 ? "" : ", ") + propertyName;
-                }
-                headerArr.sort(function (a, b) { return a == b ? 0 : (a > b ? 1 : -1); });
-                for (var i = 0; i < headerArr.length; i++) {
-                    header += (header.length == 0 ? "" : ", ") + headerArr[i];
-                }
-                $("#detailsTitle").text(header);
-            } else {
-                $("#detailsNoSelection").show();
-                $("#detailsSelection").hide();
-                $("#regionSelector").hide();
-            }
-
-            var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
-            for (var i = 0; i < worksheets.length; i++) {
-                var ws = worksheets[i];
-                ws.applyFilterAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
-
-            }
-
-            if (changeMap) {
-                worksheets = mapDashboard.getWorkbook().getActiveSheet().getWorksheets();
-                for (var i = 0; i < worksheets.length; i++) {
-                    var ws = worksheets[i];
-                    ws.selectMarksAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
-
-                }
-            }
-
-
-        }
-
-        function onMarksSelection(marksEvent) {
-            
-            return marksEvent.getMarksAsync().then(reportSelectedMarks);
-        }
-
-        var doNotSkipEvent = true;
-        var firstMarks = null;
-        function reportSelectedMarks(marks) {
-            doNotSkipEvent = !doNotSkipEvent;
-            if (!doNotSkipEvent) {
-                firstMarks = marks;
-            } else {
-                if (firstMarks.length == 0 && marks.length == 0) {
-                    $("#regionSelectorCtrl").val('None');
-                    switchDashboard(["None"]);
-                } else {
-                    if (firstMarks.length != 0) {
-                        marks = firstMarks;
-                    }
-                    var selectedRegion = [];
-                    for (var markIndex = 0; markIndex < marks.length; markIndex++) {
-                        var pairs = marks[markIndex].getPairs();
-
-                        for (var pairIndex = 0; pairIndex < pairs.length; pairIndex++) {
-                            var pair = pairs[pairIndex];
-                            if (pair.fieldName == "Region") {
-                                selectedRegion.push(pair.formattedValue);
-                            }
-
-                        }
-
-                    }
-                    $("#regionSelectorCtrl").val(selectedRegion[0]);
-                    switchDashboard(selectedRegion);
-                }
-            }
-        }
-
-        var currentFilters = ['All'];
-        function loanSizeParameterChanged(cbx) {
-            var cb = $(cbx);
-            var val = cb.val();
-            var checked = cb.prop("checked");
-            
-            switch (val) {
-                case "All":
-                    $("[id^='cbxLoan']").prop("checked", checked);
-                    break;
-                case "Sme":
-                    $("#cbxLoanSmall, #cbxLoanMedium").prop("checked", checked);
-                    break;
-                case "Small":
-                case "Medium":
-                    if ($("#cbxLoanSmall").prop("checked") && $("#cbxLoanMedium").prop("checked")) {
-                        $("#cbxLoanSme").prop("checked", true);
-                    } else {
-                        $("#cbxLoanSme").prop("checked", false);
-                    }
-                    break;
-            }
-            if ($("#cbxLoanSmall").prop("checked") && $("#cbxLoanMedium").prop("checked") && $("#cbxLoanRetail").prop("checked")
-                && $("#cbxLoanCorporate").prop("checked") && $("#cbxLoanMicro").prop("checked")) {
-                $("#cbxLoanAll").prop("checked", true);
-            } else {
-                $("#cbxLoanAll").prop("checked", false);
-            }
-
-            var filter = [];
-            $("[id^='cbxLoan']:checked").each(function(index) {
-                filter[index] = $(this).val();
-            });
-            var vizs = tableauSoftware.VizManager.getVizs();
-            for (var i = 0; i < vizs.length; i++) {
-                var viz = $(vizs[i].getParentElement());
-                if (viz.attr('id') == "detailsDashboard") {
-                    detailsDashboard = vizs[i];
-                    break;
-                }
-            }
-            var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
-            for (var i = 0; i < worksheets.length; i++) { 
-                var ws = worksheets[i];
-                ws.applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
-                
-            }
         
-        }
-
-        function onFilterChange(ev) {
-            //alert(ev);
-        }
-
-        function initializeDashboard(divId, url, height, width, isDetails) {
-            var placeholderDiv = document.getElementById(divId);
-            var options = {
-                width: width!=undefined && width != null ? width : placeholderDiv.offsetWidth,
-                height: height,
-                hideTabs: true,
-                hideToolbar: true,
-                onFirstInteractive : function(ev) {
-                    var v = ev.getViz();
-                    if (!isDetails) {
-                        v.addEventListener(tableauSoftware.TableauEventName.MARKS_SELECTION, onMarksSelection);
-                        initializeDashboard("detailsDashboard", "http://public.tableausoftware.com/views/RegionDashboard-Reachdata/PortfolioComposition", 869, 1004, true);
-                        if (navigator.userAgent.search("Firefox") >= 0) {
-                            switchDashboard(['Europe and Central Asia'], true);
-                        }
-                    } else {
-                        v.addEventListener(tableauSoftware.TableauEventName.FILTER_CHANGE, onFilterChange);
-                        
-                    }
-                }
-
-            };
-            
-            var viz = new tableauSoftware.Viz(placeholderDiv, url, options);
-            if (isDetails) {
-                detailsDashboard = viz;
-                
-                
-            } else {
-                mapDashboard = viz;
-                
-            }
-            return viz;
-        }
-
-        function showLoanSizeSelector() {
-            $("#loanSelector").dialog({modal: true});
-            
-        }
 
         $(function () {
             $("#tabs").tabs({
                 activate: function (event, ui) {
-                    switch (event.currentTarget.id) {
-                        case "ag":
-                            detailsDashboard.getWorkbook().activateSheetAsync("Growth trends");
-                            $("#loanSelector").hide();
-                            break;
-                        case "ap":
-                            detailsDashboard.getWorkbook().activateSheetAsync("Portfolio Composition");
-                            $("#loanSelector").show();
-                            break;
-                        case "tab3":
-                            detailsDashboard.getWorkbook().activateSheetAsync("Tab 1");
-                            $("#loanSelector").hide();
-                            break;
-                        case "tab4":
-                            detailsDashboard.getWorkbook().activateSheetAsync("Tab 2");
-                            $("#loanSelector").hide();
-                            break;
-                        case "tab5":
-                            detailsDashboard.getWorkbook().activateSheetAsync("Tab 3");
-                            $("#loanSelector").hide();
-                            break;
-                    }
+                    selectTab(event.currentTarget.id);
+
                 }
             });
             
-            initializeDashboard("mapDashboard", "http://public.tableausoftware.com/views/PortfolioHighlights/Dashboard2", 600, null, false);
+            initializeDashboard("mapDashboard", "http://public.tableausoftware.com/views/PortfolioHighlights/Dashboard2", 600, 960, false);
             
         });
 
@@ -282,11 +79,11 @@
             </div>
 
             
-            <div id="detailsNoSelection">Select a Region to see additional details</div>
-            <div id="regionSelector" style="margin-right: 30px;display: none" >
+            <!--<div id="detailsNoSelection">Select a Region to see additional details</div>-->
+            <div id="regionSelector" style="margin-right: 30px;" >
         <div>
             Select Region: <select id="regionSelectorCtrl" onchange="switchDashboard([$(this).val()], false, true)">
-                               <option value="None">None</option>
+                               <option value="None">All Regions</option>
                                <option value="East Asia and the Pacific">East Asia and the Pacific</option>
                                <option value="Europe and Central Asia">Europe and Central Asia</option>
                                <option value="Latin America and the Caribbean">Latin America and the Caribbean</option>
@@ -299,8 +96,8 @@
     </div>
 
 
-            <div id="detailsSelection" style="display: none">
-                <div id="detailsTitle" class="detailsTitle"></div>
+            <div id="detailsSelection" >
+                <div id="detailsTitle" class="detailsTitle">All Regions</div>
                 <div id="tabs">
                     <ul>
                         <li><a id="ap" href="#tabs-1">Portfolio Composition</a></li>
@@ -321,7 +118,9 @@
                             <div style="padding-left: 20px">Medium <input type="checkbox" id="cbxLoanMedium" checked="checked" onchange="loanSizeParameterChanged(this)" value="Medium" /></div>
                             <div>Corporate <input type="checkbox" id="cbxLoanCorporate" checked="checked" onchange="loanSizeParameterChanged(this)" value="Corporate" /></div>
                         </div>
-                        <div id="detailsDashboard" style="width: 100%"></div>
+                        <div id="allRegionsDashboard" style="width: 100%"></div>
+                        <div id="detailsDashboard" style="display: none; width: 100%"></div>
+                        
                     </div>
                 </div>
             </div>

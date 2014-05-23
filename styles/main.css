@@ -519,5 +519,6 @@ line-height: 15px;
 .detailsTitle {
     font-size: 1.4em;
     padding: 10px 0px;
+    display: block;
 }
 
