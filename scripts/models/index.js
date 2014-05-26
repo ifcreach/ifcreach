@@ -41,8 +41,10 @@ function switchDashboard(selectedId, hideOnLoad, changeMap) {
         var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
         for (var i = 0; i < worksheets.length; i++) {
             var ws = worksheets[i];
-            ws.applyFilterAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
-
+            var name = ws.getName();
+            if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
+                ws.applyFilterAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
+            }
         }
     }
 
@@ -50,8 +52,10 @@ function switchDashboard(selectedId, hideOnLoad, changeMap) {
         worksheets = mapDashboard.getWorkbook().getActiveSheet().getWorksheets();
         for (var i = 0; i < worksheets.length; i++) {
             var ws = worksheets[i];
-            ws.selectMarksAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
-
+            var name = ws.getName();
+            if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
+                ws.selectMarksAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
+            }
         }
     }
 
@@ -59,7 +63,7 @@ function switchDashboard(selectedId, hideOnLoad, changeMap) {
 }
 
 function onMarksSelection(marksEvent) {
-
+    //debugger;
     return marksEvent.getMarksAsync().then(reportSelectedMarks);
 }
 
@@ -155,7 +159,11 @@ function applyLoanSizeFilter(filter) {
     var worksheets = activeDashboard.getWorkbook().getActiveSheet().getWorksheets();
     for (var i = 0; i < worksheets.length; i++) {
         var ws = worksheets[i];
-        ws.applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
+        //debugger;
+        var name = ws.getName();
+        if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
+            ws.applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
+        }
 
     }
 }
@@ -222,12 +230,21 @@ var currentTab = {
 
 
 function resetActiveDashboard() {
-    selectTab(currentTab.tabId);
-    $("#tabs").tabs("option", "active", currentTab.tabIndex);
+    //selectTab(currentTab.tabId);
+    //$("#tabs").tabs("option", "active", currentTab.tabIndex);
+    //if ($("#regionSelectorCtrl").) {
+    
+    //}
+
+    selectTab("ap", true);
+    $("#tabs").tabs("option", "active", 0);
     applyLoanSizeFilter(currentFilters);
+    
 }
 
-function selectTab(id) {
+
+
+function selectTab(id, updateRegionFilter) {
     switch (id) {
         case "ag":
             activeDashboard.getWorkbook().activateSheetAsync("Growth trends");
@@ -238,7 +255,19 @@ function selectTab(id) {
             $("#loanSelector").hide();
             break;
         case "ap":
-            activeDashboard.getWorkbook().activateSheetAsync("Portfolio Composition");
+            activeDashboard.getWorkbook().activateSheetAsync("Portfolio Composition").then(function () {
+                var val = $("#regionSelectorCtrl").val();
+                if (val != "None" && updateRegionFilter) {
+                    var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
+                    for (var i = 0; i < worksheets.length; i++) {
+                        var ws = worksheets[i];
+                        var name = ws.getName();
+                        if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
+                            ws.applyFilterAsync("Region", val, tableauSoftware.FilterUpdateType.REPLACE);
+                        }
+                    }
+                }
+            });
             currentTab = {
                 tabId: id,
                 tabIndex: 0
