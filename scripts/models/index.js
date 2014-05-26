@@ -48,18 +48,22 @@ function switchDashboard(selectedId, hideOnLoad, changeMap) {
         }
     }
 
+    
+
+
+}
+
+function onSelectRegionChange(selectedId, hideOnLoad, changeMap) {
     if (changeMap) {
-        worksheets = mapDashboard.getWorkbook().getActiveSheet().getWorksheets();
+        var worksheets = mapDashboard.getWorkbook().getActiveSheet().getWorksheets();
         for (var i = 0; i < worksheets.length; i++) {
             var ws = worksheets[i];
-            var name = ws.getName();
-            if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
-                ws.selectMarksAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
-            }
+            //var name = ws.getName();
+            //if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
+            ws.selectMarksAsync("Region", selectedId, tableauSoftware.FilterUpdateType.REPLACE);
+            //}
         }
     }
-
-
 }
 
 function onMarksSelection(marksEvent) {
