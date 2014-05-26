@@ -96,6 +96,7 @@ function reportSelectedMarks(marks) {
             }
             $("#regionSelectorCtrl").val(selectedRegion[0]);
             switchDashboard(selectedRegion);
+            firstMarks = null;
         }
     }
 }
@@ -159,7 +160,6 @@ function applyLoanSizeFilter(filter) {
     var worksheets = activeDashboard.getWorkbook().getActiveSheet().getWorksheets();
     for (var i = 0; i < worksheets.length; i++) {
         var ws = worksheets[i];
-        //debugger;
         var name = ws.getName();
         if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
             ws.applyFilterAsync("Loan Size", filter, tableauSoftware.FilterUpdateType.REPLACE);
@@ -230,24 +230,45 @@ var currentTab = {
 
 
 function resetActiveDashboard() {
-    //selectTab(currentTab.tabId);
-    //$("#tabs").tabs("option", "active", currentTab.tabIndex);
+    selectTab(currentTab.tabId);
+    $("#tabs").tabs("option", "active", currentTab.tabIndex);
     //if ($("#regionSelectorCtrl").) {
     
     //}
 
-    selectTab("ap", true);
-    $("#tabs").tabs("option", "active", 0);
+    //selectTab("ap", true);
+    //$("#tabs").tabs("option", "active", 0);
     applyLoanSizeFilter(currentFilters);
     
 }
 
-
+function applyRegionFilter() {
+    var val = $("#regionSelectorCtrl").val();
+    if (val != "None" ) {
+        var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
+        
+        for (var i = 0; i < worksheets.length; i++) {
+            var ws = worksheets[i];
+            
+            var name = ws.getName();
+            
+            if (name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
+                ws.applyFilterAsync("Region", [val], tableauSoftware.FilterUpdateType.REPLACE);
+            }
+            /*else {
+                ws.applyFilterAsync("Regions", ["All"], tableauSoftware.FilterUpdateType.REPLACE);
+            }*/
+        }
+    }
+}
 
 function selectTab(id, updateRegionFilter) {
+    updateRegionFilter = true;
     switch (id) {
         case "ag":
-            activeDashboard.getWorkbook().activateSheetAsync("Growth trends");
+            activeDashboard.getWorkbook().activateSheetAsync("Growth trends").then(function () {
+               applyRegionFilter();
+            });
             currentTab = {
                 tabId: id,
                 tabIndex: 1
@@ -256,17 +277,7 @@ function selectTab(id, updateRegionFilter) {
             break;
         case "ap":
             activeDashboard.getWorkbook().activateSheetAsync("Portfolio Composition").then(function () {
-                var val = $("#regionSelectorCtrl").val();
-                if (val != "None" && updateRegionFilter) {
-                    var worksheets = detailsDashboard.getWorkbook().getActiveSheet().getWorksheets();
-                    for (var i = 0; i < worksheets.length; i++) {
-                        var ws = worksheets[i];
-                        var name = ws.getName();
-                        if (name != "Sheet 6" && name != "Sheet 7" && name != "Sheet 8" && name != "Sheet 9") {
-                            ws.applyFilterAsync("Region", val, tableauSoftware.FilterUpdateType.REPLACE);
-                        }
-                    }
-                }
+               applyRegionFilter();
             });
             currentTab = {
                 tabId: id,
@@ -275,7 +286,9 @@ function selectTab(id, updateRegionFilter) {
             $("#loanSelector").show();
             break;
         case "tab3":
-            activeDashboard.getWorkbook().activateSheetAsync("Tab 1");
+            activeDashboard.getWorkbook().activateSheetAsync("Tab 1").then(function () {
+               applyRegionFilter();
+            });
             currentTab = {
                 tabId: id,
                 tabIndex: 2
@@ -283,7 +296,9 @@ function selectTab(id, updateRegionFilter) {
             $("#loanSelector").hide();
             break;
         case "tab4":
-            activeDashboard.getWorkbook().activateSheetAsync("Tab 2");
+            activeDashboard.getWorkbook().activateSheetAsync("Tab 2").then(function () {
+                applyRegionFilter();
+            });
             currentTab = {
                 tabId: id,
                 tabIndex: 3
