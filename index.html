@@ -109,14 +109,34 @@
                     <div id="tabs-1">
                     
                         <div id="loanSelector" title="Select loan size" >
-                            <div>Select loan size:</div>
-                            <div>All <input type="checkbox" id="cbxLoanAll" checked="checked" onchange="loanSizeParameterChanged(this)" value="All" /></div>
-                            <div>Retail <input type="checkbox" id="cbxLoanRetail" checked="checked" onchange="loanSizeParameterChanged(this)" value="Retail" /></div>
-                            <div>Micro <input type="checkbox" id="cbxLoanMicro" checked="checked" onchange="loanSizeParameterChanged(this)" value="Micro" /></div>
-                            <div>SME <input type="checkbox" id="cbxLoanSme" checked="checked" onchange="loanSizeParameterChanged(this)" value="Sme" /></div>
-                            <div style="padding-left: 20px">Small <input type="checkbox" id="cbxLoanSmall" checked="checked" onchange="loanSizeParameterChanged(this)" value="Small" /></div>
-                            <div style="padding-left: 20px">Medium <input type="checkbox" id="cbxLoanMedium" checked="checked" onchange="loanSizeParameterChanged(this)" value="Medium" /></div>
-                            <div>Corporate <input type="checkbox" id="cbxLoanCorporate" checked="checked" onchange="loanSizeParameterChanged(this)" value="Corporate" /></div>
+                            <div>
+                                <div class="left" style="width: 180px"><span class="left" style="padding-top: 3px">Select loan size:</span>
+                                    <div class="left" style="margin-left: 20px"><input style="" type="checkbox" id="cbxLoanAll" checked="checked" onchange="loanSizeParameterChanged(this)" value="All" /> All</div>
+                                </div>
+                                <div class="left" style=""><input type="checkbox" id="cbxLoanRetail" checked="checked" onchange="loanSizeParameterChanged(this)" value="Retail" /> Retail</div>
+                                <div class="clear" ></div>
+                            </div>
+                            <div style="margin-left: 180px">
+                                <div class="left" style="width: 65px">
+                                    <input type="checkbox" id="cbxLoanMicro" checked="checked" onchange="loanSizeParameterChanged(this)" value="Micro" /> Micro
+                                </div>
+                                <div class="left" style="padding-top: 15px">
+                                    
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                            <div style="margin-left: 180px">
+                                <div class="left" style="width: 65px; padding-top: 15px">
+                                    <input type="checkbox" id="cbxLoanSme" checked="checked" onchange="loanSizeParameterChanged(this)" value="Sme" /> SME
+                                </div>
+                                <div class="left" style="padding-top: 6px">
+                                    <div><input type="checkbox" id="cbxLoanSmall" checked="checked" onchange="loanSizeParameterChanged(this)" value="Small" /> Small</div>
+                                    <div><input type="checkbox" id="cbxLoanMedium" checked="checked" onchange="loanSizeParameterChanged(this)" value="Medium" /> Medium</div>
+                                </div>
+                                <div class="clear"></div>
+                             </div>
+                            <div style="margin-left: 180px"><input type="checkbox" id="cbxLoanCorporate" checked="checked" onchange="loanSizeParameterChanged(this)" value="Corporate" /> Corporate</div>
+                            
                         </div>
                         <div id="allRegionsDashboard" style="width: 100%"></div>
                         <div id="detailsDashboard" style="display: none; width: 100%"></div>
